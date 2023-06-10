@@ -160,7 +160,6 @@ public class ServletContainersInitConfig extends AbstractAnnotationConfigDispatc
             <artifactId>tomcat7-maven-plugin</artifactId>
             <version>2.1</version>
             <configuration>
-                <port>8000</port>
                 <path>/</path>
             </configuration>
         </plugin>
@@ -739,9 +738,194 @@ public class UserController {
   - 采用RESTful进行开发当参数数量较少时, 例如1个, 可以采用@PathVariable接收请求路径变量, 通常用于传递id值,多于1个最好使用json格式
 
 ## 3. REST快速开发
+简化代码的书写, 直接放上代码, 代码里有注释
+```java
+/*
+ * 2. 定义controller
+ * 使用@Controller定义bean
+ * 统一访问域名设为users
+ * 采用REST风格通过网页访问行为来区分方法
+ * @RestController = @Controller + @Response
+ * */
+@RestController
+@RequestMapping("/users")
+public class UserController {
+    @Autowired
+    private UserService userService;
+    /*
+    * 设置当前操作的访问路径
+    * @RequestMapping("/save")
+    * 设置当前操作的返回值类型, 返回给游览器的游览方
+    * @ResponseBody
+    * method = RequestMethod.控制行为  GET,POST,PUT,DELETE
+    * save方法采用RequestMethod.POST
+    * @RequestMapping(method = RequestMethod.POST)简写格式
+    * @PostMapping
+    * */
+    //@RequestMapping(method = RequestMethod.POST)
+    @PostMapping
+    public String save() {
+        System.out.println("user save...");
+        return "{'module':'springmvc-save'}";
+    }
 
+    /*
+    * 删除方法RequestMethod.DELETE
+    * */
+    //@RequestMapping(method = RequestMethod.DELETE)
+    @DeleteMapping
+    public String delete() {
+        System.out.println("user delete...");
+        return "{'module':'springmvc-delete'}";
+    }
+
+    /*
+    * 查询方法RequestMethod.GET
+    * 设定请求参数(路径变量)
+    * @PathVariable声明参数来自网络路径,
+    * value = "/{id}告诉参数具体来自哪个网络路径的参数, 或者说网络参数往哪个形参传递
+    * */
+    //@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @GetMapping("/{id}")
+    public String searchUser(@PathVariable Integer id) {
+        System.out.println("user search...");
+        return userService.select(id);
+    }
+
+    /*
+     * 更新学生信息RequestMethod.PUT
+     * @PathVariable声明参数来自网络路径,
+     * value = "/{id}告诉形参来接收路径参数的的哪一个, 或者说路径参数该往哪里传
+     * @RequestBody已经注明是JSON对象传递, 并不需要特地告诉参网络参数往哪个形参传递
+     * */
+    //@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @PutMapping("/{id}")
+    public String studentParam(@RequestBody Student student, @PathVariable Integer id) {
+        System.out.println("参数传递, 修改id为" + id + "的student" + student);
+        return student.toString();
+    }
+}
+```
 ## 4. 案例: 基于RESTful页面数据交互
+### (1). 后台接口准备
+Book类
+```java
+public class Book {
+    private Integer id;
+    private String type;
+    private String name;
+    private String description;
+}
+```
+控制层
+```java
+@RestController
+@RequestMapping("/books")
+public class BookController {
+  @PostMapping
+  public String save(@RequestBody Book book) {
+    System.out.println("book save ==> " + book);
+    return "{'module':'book save success'}";
+  }
 
+  @GetMapping
+  public List<Book> getAll() {
+    Book book1 = new Book();
+    book1.setType("计算机");
+    book1.setName("SpringMVC入门");
+    book1.setDescription("web层开发");
+
+    Book book2 = new Book();
+    book2.setType("计算机");
+    book2.setName("SpringMVC实战");
+    book2.setDescription("web层开发");
+
+    List<Book> bookList = new ArrayList<>();
+    bookList.add(book1);
+    bookList.add(book2);
+
+    return bookList;
+  }
+
+}
+```
+
+### (2). 页面访问处理
+新增一个静态资源配置类来加载处理静态资源
+```java
+@Configuration
+public class SpringMvcSupport extends WebMvcConfigurationSupport {
+    /*
+     * 加载静态资源
+     * */
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        //registry.addResourceHandler("/resources/**").addResourceLocations("file:src\\main\\webapp\\resources\\");
+        registry.addResourceHandler("/js/**").addResourceLocations("file:src\\main\\webapp\\js\\");
+        registry.addResourceHandler("/css/**").addResourceLocations("file:src\\main\\webapp\\css\\");
+        registry.addResourceHandler("/pages/**").addResourceLocations("file:src\\main\\webapp\\pages\\");
+        registry.addResourceHandler("/plugins/**").addResourceLocations("file:src\\main\\webapp\\plugins\\");
+    }
+}
+```
+SpringMVC配置文件扫描这个静态资源配置文件
+```java
+@Configuration
+@ComponentScan({"com.itstudy.controller", "com.itstudy.config"})
+@EnableWebMvc
+public class SpringMvcConfig {
+
+}
+```
+编写VUE数据控制逻辑
+```javascript
+var vue = new Vue({
+
+    el: '#app',
+
+    data: {
+        dataList: [],//当前页要展示的分页列表数据
+        formData: {},//表单数据
+        dialogFormVisible: false,//增加表单是否可见
+        dialogFormVisible4Edit: false,//编辑表单是否可见
+        pagination: {},//分页模型数据，暂时弃用
+    },
+
+    //钩子函数，VUE对象初始化完成后自动执行
+    created() {
+        this.getAll();
+    },
+
+    methods: {
+        // 重置表单
+        resetForm() {
+            //清空输入框
+            this.formData = {};
+        },
+
+        // 弹出添加窗口
+        openSave() {
+            this.dialogFormVisible = true;
+            this.resetForm();
+        },
+
+        //添加
+        saveBook() {
+            axios.post("/books", this.formData).then((res) => {
+
+            });
+        },
+
+        //主页列表查询
+        getAll() {
+            axios.get("/books").then((res) => {
+                this.dataList = res.data;
+            });
+        },
+
+    }
+})
+```
 # 四. SSM整合
 
 # 五 . 拦截器

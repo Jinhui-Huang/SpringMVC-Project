@@ -7,9 +7,10 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="SpringMVC_Demo03" />
+        <module name="SpringMVC_Demo04" />
         <module name="SpringMVC_Demo01" />
         <module name="SpringMVC_Demo02" />
-        <module name="SpringMVC_Demo03" />
       </profile>
     </annotationProcessing>
   </component>

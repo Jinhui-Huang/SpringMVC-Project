@@ -16,6 +16,7 @@ import java.util.List;
  * 使用@Controller定义bean
  * 统一访问域名设为users
  * 采用REST风格通过网页访问行为来区分方法
+ * @RestController = @Controller + @Response
  * */
 @RestController
 @RequestMapping("/users")
@@ -29,9 +30,11 @@ public class UserController {
     * @ResponseBody
     * method = RequestMethod.控制行为  GET,POST,PUT,DELETE
     * save方法采用RequestMethod.POST
+    * @RequestMapping(method = RequestMethod.POST)简写格式
+    * @PostMapping
     * */
-    @RequestMapping(method = RequestMethod.POST)
-    @ResponseBody
+    //@RequestMapping(method = RequestMethod.POST)
+    @PostMapping
     public String save() {
         System.out.println("user save...");
         return "{'module':'springmvc-save'}";
@@ -40,8 +43,8 @@ public class UserController {
     /*
     * 删除方法RequestMethod.DELETE
     * */
-    @RequestMapping(method = RequestMethod.DELETE)
-    @ResponseBody
+    //@RequestMapping(method = RequestMethod.DELETE)
+    @DeleteMapping
     public String delete() {
         System.out.println("user delete...");
         return "{'module':'springmvc-delete'}";
@@ -53,8 +56,8 @@ public class UserController {
     * @PathVariable声明参数来自网络路径,
     * value = "/{id}告诉参数具体来自哪个网络路径的参数, 或者说网络参数往哪个形参传递
     * */
-    @RequestMapping(value = "/{id}", method = RequestMethod.GET)
-    @ResponseBody
+    //@RequestMapping(value = "/{id}", method = RequestMethod.GET)
+    @GetMapping("/{id}")
     public String searchUser(@PathVariable Integer id) {
         System.out.println("user search...");
         return userService.select(id);
@@ -66,8 +69,8 @@ public class UserController {
      * value = "/{id}告诉形参来接收路径参数的的哪一个, 或者说路径参数该往哪里传
      * @RequestBody已经注明是JSON对象传递, 并不需要特地告诉参网络参数往哪个形参传递
      * */
-    @RequestMapping(value = "/{id}", method = RequestMethod.PUT)
-    @ResponseBody
+    //@RequestMapping(value = "/{id}", method = RequestMethod.PUT)
+    @PutMapping("/{id}")
     public String studentParam(@RequestBody Student student, @PathVariable Integer id) {
         System.out.println("参数传递, 修改id为" + id + "的student" + student);
         return student.toString();
@@ -79,7 +82,6 @@ public class UserController {
     * Get/Post请求传递参数
     * */
     @RequestMapping("/getResponse")
-    @ResponseBody
     public String getResponse(@RequestParam("name") String username, int age) {
         System.out.println("普通参数传递 name ==> " + username);
         System.out.println("普通参数传递 age ==> " + age);
@@ -91,7 +93,6 @@ public class UserController {
     * 数组参数传递
     * */
     @RequestMapping("arrayParam")
-    @ResponseBody
     public String arrayParam(String[] strArray) {
         System.out.println("数组参数传递 ==> " + Arrays.toString(strArray));
         return Arrays.toString(strArray);
@@ -101,7 +102,6 @@ public class UserController {
     * 集合参数传递
     * */
     @RequestMapping("listParam")
-    @ResponseBody
     public String listParam(@RequestParam List<String> strList) {
         System.out.println("数组参数传递 ==> " + strList);
         return strList.toString();
@@ -111,7 +111,6 @@ public class UserController {
     * json数据传递, 集合参数
     * */
     @RequestMapping("listParamForJson")
-    @ResponseBody
     public String listParamForJson(@RequestBody List<String> strList) {
         System.out.println("json数据传递 ==> " + strList);
         return strList.toString();
@@ -121,7 +120,6 @@ public class UserController {
     * json数据传递, 对象pojo参数
     * */
     @RequestMapping("studentParamForJson")
-    @ResponseBody
     public String studentParamForJson(@RequestBody Student student) {
         System.out.println("参数传递student: " + student);
         return student.toString();
