@@ -1,86 +1,86 @@
 package com.itstudy.domain;
 
 public class Book {
-    private Integer id;
-    private String type;
-    private String name;
-    private String description;
+    private Integer BookId;
+    private String BookType;
+    private String BookName;
+    private String BookDescription;
 
     public Book() {
     }
 
-    public Book(Integer id, String type, String name, String description) {
-        this.id = id;
-        this.type = type;
-        this.name = name;
-        this.description = description;
+    public Book(Integer BookId, String BookType, String BookName, String BookDescription) {
+        this.BookId = BookId;
+        this.BookType = BookType;
+        this.BookName = BookName;
+        this.BookDescription = BookDescription;
     }
 
     /**
      * 获取
-     * @return id
+     * @return BookId
      */
-    public Integer getId() {
-        return id;
+    public Integer getBookId() {
+        return BookId;
     }
 
     /**
      * 设置
-     * @param id
+     * @param BookId
      */
-    public void setId(Integer id) {
-        this.id = id;
+    public void setBookId(Integer BookId) {
+        this.BookId = BookId;
     }
 
     /**
      * 获取
-     * @return type
+     * @return BookType
      */
-    public String getType() {
-        return type;
+    public String getBookType() {
+        return BookType;
     }
 
     /**
      * 设置
-     * @param type
+     * @param BookType
      */
-    public void setType(String type) {
-        this.type = type;
+    public void setBookType(String BookType) {
+        this.BookType = BookType;
     }
 
     /**
      * 获取
-     * @return name
+     * @return BookName
      */
-    public String getName() {
-        return name;
+    public String getBookName() {
+        return BookName;
     }
 
     /**
      * 设置
-     * @param name
+     * @param BookName
      */
-    public void setName(String name) {
-        this.name = name;
+    public void setBookName(String BookName) {
+        this.BookName = BookName;
     }
 
     /**
      * 获取
-     * @return description
+     * @return BookDescription
      */
-    public String getDescription() {
-        return description;
+    public String getBookDescription() {
+        return BookDescription;
     }
 
     /**
      * 设置
-     * @param description
+     * @param BookDescription
      */
-    public void setDescription(String description) {
-        this.description = description;
+    public void setBookDescription(String BookDescription) {
+        this.BookDescription = BookDescription;
     }
 
     public String toString() {
-        return "Book{id = " + id + ", type = " + type + ", name = " + name + ", description = " + description + "}";
+        return "Book{BookId = " + BookId + ", BookType = " + BookType + ", BookName = " + BookName + ", BookDescription = " + BookDescription + "}";
     }
 }

@@ -25,6 +25,8 @@
   * [2. RESTful入门案例](#2-restful入门案例)
   * [3. REST快速开发](#3-rest快速开发)
   * [4. 案例: 基于RESTful页面数据交互](#4-案例-基于restful页面数据交互)
+    * [(1). 后台接口准备](#1-后台接口准备)
+    * [(2). 页面访问处理](#2-页面访问处理)
 * [四. SSM整合](#四-ssm整合)
 * [五 . 拦截器](#五--拦截器)
 <!-- TOC -->
@@ -927,5 +929,253 @@ var vue = new Vue({
 })
 ```
 # 四. SSM整合
+![](SSM整合.PNG)
+- Spring配置
+- Spring整合MyBatis
+- Spring整合SpringMVC
+- RESTful表准控制器开发
+## 1. 接口测试异常处理
+
+```
+Caused by: org.springframework.beans.BeanInstantiationException: Failed to instantiate [org.springframework.web.servlet.HandlerMapping]: Factory method 'resourceHandlerMapping' threw exception; nested exception is java.lang.IllegalStateException: No ServletContext set
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:185)
+	at org.springframework.beans.factory.support.ConstructorResolver.instantiate(ConstructorResolver.java:650)
+	... 45 more
+Caused by: java.lang.IllegalStateException: No ServletContext set
+	at org.springframework.util.Assert.state(Assert.java:76)
+	at org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport.resourceHandlerMapping(WebMvcConfigurationSupport.java:534)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method)
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:62)
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:566)
+	at org.springframework.beans.factory.support.SimpleInstantiationStrategy.instantiate(SimpleInstantiationStrategy.java:154)
+	... 46 more
+```
+容器的加载问题上。
+第一个问题，@EnableWebMvc 注解和 SpringMvc 相关，应该将其写在 SpringMvcConfig.java 文件上。
+第二个问题，在 SpringConfig.java 里，扫描了 com.xxx.config 包，也许产生了容器加载上的问题。
+因此在 ComponentScan 的写法上，可以采用常规写法，具体到每一个需要扫描的包。
+```java
+@Configuration
+@ComponentScan(value = {"com.itstudy.dao","com.itstudy.service"},
+        excludeFilters = @ComponentScan.Filter(type = FilterType.ANNOTATION, classes = Controller.class))
+@PropertySource({"classpath:jdbc.properties"})
+@Import({JdbcConfig.class, MyBatisConfig.class})
+@EnableTransactionManagement //开启事务
+public class SpringConfig {
+}
+```
+
+## 2.表现层数据封装
+设置统一返回结果类
+```java
+
+public class Result {
+  private Integer code;
+  private Object data;
+  private String msg;
+
+  public Result() {
+  }
+
+  public Result(Integer code, Object data) {
+    this.code = code;
+    this.data = data;
+  }
+
+  public Result(Integer code, Object data, String msg) {
+    this.code = code;
+    this.data = data;
+    this.msg = msg;
+  }
+
+  public Object getData() {
+    return data;
+  }
+
+  public void setData(Object data) {
+    this.data = data;
+  }
+
+  public Integer getCode() {
+    return code;
+  }
+
+  public void setCode(Integer code) {
+    this.code = code;
+  }
+
+  public String getMsg() {
+    return msg;
+  }
+
+  public void setMsg(String msg) {
+    this.msg = msg;
+  }
+}
+
+```
+Code.java
+```java
+
+public class Code {
+    /**
+     * 1 代表成功
+     * 0 代表失败
+     * */
+    public static final Integer SAVE_OK = 20011;
+    public static final Integer DELETE_OK = 20021;
+    public static final Integer UPDATE_OK = 20031;
+    public static final Integer GET_OK = 20041;
+
+    public static final Integer SAVE_ERR = 20010;
+    public static final Integer DELETE_ERR = 20020;
+    public static final Integer UPDATE_ERR = 20030;
+    public static final Integer GET_ERR = 20040;
+}
+
+```
+
+## 3. 异常处理器
+1, 各个层级均出现异常, 异常处理代码写在哪一层
+
+**所有的异常均抛出到表现层进行处理**
+
+2, 表现层 处理异常,每个方法中单独书写 ,代码书写量巨大且意义不强,如何解决
+
+**AOP思想**
+
+- Spring提供的快速处理方案, 异常处理器
+集中的,统一的处理项目中出现的异常
+```java
+/**
+ * 项目异常处理器
+ * 声明这个类是做异常处理的@RestControllerAdvice
+ * 编写方法来处理异常
+ * */
+@RestControllerAdvice
+public class ProjectExceptionAdvice {
+  @ExceptionHandler(Exception.class)
+  public Result doException(Exception ex){
+    System.out.println("出现异常");
+    ex.printStackTrace();
+    return new Result(00000, null, "find exception");
+  }
+}
+
+```
+
+## 4. 项目异常处理方案
+![](项目异常分类.PNG)
+![](项目异常处理方案.PNG)
+将可能出现的异常进行包装,转换成自定义异常
+
+系统异常处理
+```java
+
+/**
+ * code 异常编号
+ * 系统异常的处理方案
+ * */
+public class BusinessException extends RuntimeException{
+  private Integer code;
+
+  public BusinessException(Integer code, String message) {
+    super(message);
+    this.code = code;
+  }
+
+  public BusinessException(Integer code, String message, Throwable cause) {
+    super(message, cause);
+    this.code = code;
+  }
+
+  public Integer getCode() {
+    return code;
+  }
+
+  public void setCode(Integer code) {
+    this.code = code;
+  }
+}
+
+```
+
+业务异常处理
+```java
+
+/**
+ * code 异常编号
+ * 业务异常的处理方案
+ * */
+public class SystemException extends RuntimeException{
+    private Integer code;
+
+    public SystemException(Integer code, String message) {
+        super(message);
+        this.code = code;
+    }
+
+    public SystemException(Integer code, String message, Throwable cause) {
+        super(message, cause);
+        this.code = code;
+    }
+
+    public Integer getCode() {
+        return code;
+    }
+
+    public void setCode(Integer code) {
+        this.code = code;
+    }
+}
+
+```
+对捕捉到的异常进行处理
+```java
+
+/**
+ * 项目异常处理器
+ * 声明这个类是做异常处理的@RestControllerAdvice
+ * 编写方法来处理异常
+ */
+@RestControllerAdvice
+public class ProjectExceptionAdvice {
+    @ExceptionHandler(SystemException.class)
+    public Result doSystemException(SystemException ex) {
+        /**
+         * 记录日志
+         * 发送消息给开发人员
+         * 发送邮件给开发人员
+         * */
+        System.out.println("出现异常");
+        ex.printStackTrace();
+        return new Result(ex.getCode(), null, ex.getMessage());
+    }
+
+    @ExceptionHandler(BusinessException.class)
+    public Result doBusinessException(BusinessException ex) {
+        System.out.println("出现异常");
+        ex.printStackTrace();
+        return new Result(ex.getCode(), null, ex.getMessage());
+    }
+
+    @ExceptionHandler(Exception.class)
+    public Result doBusinessException(Exception ex) {
+        /**
+         * 记录日志
+         * 发送消息给开发人员
+         * 发送邮件给开发人员
+         * */
+        System.out.println("出现异常");
+        ex.printStackTrace();
+        return new Result(Code.SYSTEM_UNKNOWN_ERR, false, "系统繁忙,请稍后再试!");
+    }
+
+}
+
+```
+
+## 5. SSM整合前后台协议联调
 
 # 五 . 拦截器

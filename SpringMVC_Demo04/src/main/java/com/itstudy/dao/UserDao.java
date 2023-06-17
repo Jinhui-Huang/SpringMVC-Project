@@ -6,7 +6,7 @@ import org.apache.ibatis.annotations.*;
 @Mapper
 public interface UserDao {
 
-    @Results(id = "reStaff", value = {
+    @Results(value = {
             @Result(column = "dept_id", property = "deptId"),
             @Result(column = "create_time", property = "createTime"),
             @Result(column = "update_time", property = "updateTime")
@@ -15,7 +15,7 @@ public interface UserDao {
             "VALUES (#{username}, #{name}, #{gender}, #{image}, #{job}, #{entrydate}, #{deptId}, #{createTime}, #{updateTime})")
     void save(User user);
 
-    @Results(id = "reStaff", value = {
+    @Results(value = {
             @Result(column = "dept_id", property = "deptId"),
             @Result(column = "create_time", property = "createTime"),
             @Result(column = "update_time", property = "updateTime")
