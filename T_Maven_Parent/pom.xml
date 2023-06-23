@@ -123,6 +123,7 @@
                 <version>2.9.0</version>
             </dependency>
 
+
             <!--<dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -156,6 +157,18 @@
             </plugin>
         </plugins>
     </build>
+
+    <!--配置当前工程保存在私服的具体位置-->
+    <distributionManagement>
+        <repository>
+            <id>itstudy-release</id>
+            <url>http://10.126.61.151:8081/repository/itstudy-release/</url>
+        </repository>
+        <snapshotRepository>
+            <id>itstudy-snapshot</id>
+            <url>http://10.126.61.151:8081/repository/itstudy-snapshot/</url>
+        </snapshotRepository>
+    </distributionManagement>
 
     <!--配置多环境开发-->
     <profiles>

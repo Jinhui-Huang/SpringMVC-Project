@@ -360,5 +360,29 @@ mvn install -D skipTests
 ## 1. 私服简介
 ![](私服简介.PNG)
 ## 2. 私服仓库分类
-
+私服资源操作流程分析
+![](私服仓库分类.PNG)
 ## 3. 资源上传与下载
+本地仓库资源上传私服仓库
+- 上传的位置(宿主地址)
+- 访问私服的用户名/密码
+- 下载的地址(仓库组地址)
+修改maven的配置文件
+
+本地当前工程保存在私服的具体位置
+```xml
+<!--配置当前工程保存在私服的具体位置-->
+<distributionManagement>
+    <repository>
+        <id>itstudy-release</id>
+        <url>http://10.126.61.151:8081/repository/itstudy-release/</url>
+    </repository>
+    <snapshotRepository>
+        <id>itstudy-snapshot</id>
+        <url>http://10.126.61.151:8081/repository/itstudy-snapshot/</url>
+    </snapshotRepository>
+</distributionManagement>
+```
+运行生命周期deploy进行发布
+
+![](私服上传结果.PNG)
