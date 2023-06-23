@@ -28,7 +28,16 @@
     * [(1). 后台接口准备](#1-后台接口准备)
     * [(2). 页面访问处理](#2-页面访问处理)
 * [四. SSM整合](#四-ssm整合)
-* [五 . 拦截器](#五--拦截器)
+  * [1. 接口测试异常处理](#1-接口测试异常处理)
+  * [2.表现层数据封装](#2表现层数据封装)
+  * [3. 异常处理器](#3-异常处理器)
+  * [4. 项目异常处理方案](#4-项目异常处理方案)
+  * [5. SSM整合前后台协议联调](#5-ssm整合前后台协议联调)
+* [五. 拦截器](#五-拦截器)
+  * [1. 拦截器简介](#1-拦截器简介)
+  * [2. 制作拦截器功能类](#2-制作拦截器功能类)
+  * [3. 拦截器参数](#3-拦截器参数)
+  * [4. 多拦截器链配置](#4-多拦截器链配置)
 <!-- TOC -->
 
 # 一. SpringMVC简介
@@ -1177,5 +1186,121 @@ public class ProjectExceptionAdvice {
 ```
 
 ## 5. SSM整合前后台协议联调
+前后端分离相关整合案例
+# 五. 拦截器
+## 1. 拦截器简介
+- 拦截器是一种动态拦截方法的调用机制,在SpringMVC中动态拦截控制器方法的执行
+- 作用: 
+   - 在指定的方法调用前后执行预定的代码
+   - 阻止原始方法的执行
 
-# 五 . 拦截器
+拦截器和过滤器区别
+- 归属不同: Filter属于Servlet技术,Interceptor属于SpringMVC技术
+- 拦截内容不同: Filter对所有访问进行加强,Interceptor仅针对SpringMVC的访问进行加强
+
+## 2. 制作拦截器功能类
+配置拦截器类ProjectInterceptor.java
+```java
+/**
+ * 配置拦截器实现HandlerInterceptor接口
+ * 配置拦截代码之前之后进行的代码操作
+ * 声明拦截器的bean类@Component
+ * */
+@Component
+public class ProjectInterceptor implements HandlerInterceptor {
+
+    /**
+     * 返回false可以终止原始操作的执行
+     * */
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        System.out.println("preHandle...");
+        //return HandlerInterceptor.super.preHandle(request, response, handler);
+        return true;
+    }
+
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("postHandle...");
+        //HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("afterCompletion...");
+        //HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+    }
+}
+```
+配置SpringMvcSupportConfig添加拦截器, 设定拦截路径
+```java
+@Configuration
+public class SpringMvcSupport extends WebMvcConfigurationSupport {
+    @Autowired
+    private ProjectInterceptor projectInterceptor;
+
+    /**
+     * 设置拦截的路径
+     * */
+    @Override
+    protected void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(projectInterceptor).addPathPatterns("/books","/books/*");
+    }
+}
+```
+执行流程
+![](拦截器执行流程.PNG)
+
+## 3. 拦截器参数
+```java
+@Component
+public class ProjectInterceptor implements HandlerInterceptor {
+
+    /**
+     * 返回false可以终止原始操作的执行
+     * request.getHeader("Content-Type")获取字段数据
+     * handler可以拿到原始对象,对它进行反射配置
+     * preHandle...application/json
+     * com.itstudy.controller.BookController#save(Book)
+     * com.itstudy.controller.BookController#save(Book)
+     * postHandle...
+     * afterCompletion...
+     * */
+    @Override
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+        String ContentType = request.getHeader("Content-Type");
+        System.out.println("preHandle..." + ContentType);
+
+        HandlerMethod handlerMethod = (HandlerMethod) handler;
+        System.out.println(handlerMethod);
+        System.out.println(handler);
+        //return HandlerInterceptor.super.preHandle(request, response, handler);
+        return true;
+    }
+
+    /**
+     * 以下实用性不强, 实用性最高的是preHandle
+     * */
+    @Override
+    public void postHandle(HttpServletRequest request, HttpServletResponse response, Object handler, ModelAndView modelAndView) throws Exception {
+        System.out.println("postHandle...");
+        //HandlerInterceptor.super.postHandle(request, response, handler, modelAndView);
+    }
+
+    @Override
+    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) throws Exception {
+        System.out.println("afterCompletion...");
+        //HandlerInterceptor.super.afterCompletion(request, response, handler, ex);
+    }
+}
+```
+
+## 4. 多拦截器链配置
+多个执行器的运行顺序, 与拦截器在SpringMvcSupport的配置顺序有关, 拦截器发生中断, postHandle都不允许
+![](拦截器执行顺序.PNG)
+- perHandle: 与配置顺序相同, 必定运行
+- postHandle: 与配置顺序相反, 可能不运行
+- afterCompletion: 与配置顺序相反, 可能不运行
+
+# 六. Maven高级知识点
+[maven高级知识点.md](maven高级知识点.md)

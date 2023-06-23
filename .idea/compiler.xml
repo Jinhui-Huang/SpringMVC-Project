@@ -7,10 +7,15 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="Maven_pojo" />
+        <module name="Maven_controller" />
+        <module name="Maven_exception" />
+        <module name="SpringMVC_Demo01" />
+        <module name="Maven_dao" />
+        <module name="SpringMVC_Demo02" />
+        <module name="Maven_service" />
         <module name="SpringMVC_Demo03" />
         <module name="SpringMVC_Demo04" />
-        <module name="SpringMVC_Demo01" />
-        <module name="SpringMVC_Demo02" />
       </profile>
     </annotationProcessing>
   </component>

@@ -1,4 +1,4 @@
-package com.itstudy.controller;
+package com.itstudy.service.code;
 
 public class Code {
     /**

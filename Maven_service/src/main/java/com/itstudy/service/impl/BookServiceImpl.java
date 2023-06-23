@@ -1,6 +1,6 @@
 package com.itstudy.service.impl;
 
-import com.itstudy.controller.Code;
+import com.itstudy.service.code.Code;
 import com.itstudy.dao.BookDao;
 import com.itstudy.domain.Book;
 import com.itstudy.exception.BusinessException;

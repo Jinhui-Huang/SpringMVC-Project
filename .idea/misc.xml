@@ -9,6 +9,13 @@
         <option value="$PROJECT_DIR$/SpringMVC_Demo03/pom.xml" />
         <option value="$PROJECT_DIR$/SpringDemo04/pom.xml" />
         <option value="$PROJECT_DIR$/SpringMVC_Demo04/pom.xml" />
+        <option value="$PROJECT_DIR$/Maven_pojo/pom.xml" />
+        <option value="$PROJECT_DIR$/Maven_dao/pom.xml" />
+        <option value="$PROJECT_DIR$/Maven_service/pom.xml" />
+        <option value="$PROJECT_DIR$/Maven_controller/pom.xml" />
+        <option value="$PROJECT_DIR$/Maven_exception/pom.xml" />
+        <option value="$PROJECT_DIR$/Maven_Parent/pom.xml" />
+        <option value="$PROJECT_DIR$/T_Maven_Parent/pom.xml" />
       </list>
     </option>
   </component>
